@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queens Visualizer — DAA Lab</title>
+    <meta name="description" content="Interactive N-Queens backtracking visualizer with live chessboard and recursion tree. DAA Lab FA Presentation — Shubham Nemade.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="20" width="28" height="8" rx="2" fill="url(#qg)"/>
+                        <circle cx="6"  cy="13" r="3" fill="url(#qg)" opacity="0.9"/>
+                        <circle cx="16" cy="6"  r="3" fill="url(#qg)"/>
+                        <circle cx="26" cy="13" r="3" fill="url(#qg)" opacity="0.9"/>
+                        <polygon points="6,15 16,9 26,15 23,15 16,11 9,15" fill="url(#qg)" opacity="0.8"/>
+                        <defs>
+                            <linearGradient id="qg" x1="0" y1="0" x2="32" y2="32">
+                                <stop stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">N-Queens<span class="accent">AI</span></span>
+            </div>
+            <div class="nav-title">N-Queens Problem - DAA Lab Visualizer</div>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="main-section">
+        <div class="section-header">
+            <div class="section-badge">Interactive Tool</div>
+            <h1 class="section-title">Queens <span class="gradient-text">Visualizer</span></h1>
+            <p class="section-subtitle">Watch backtracking place queens step-by-step with live conflict detection</p>
+        </div>
+
+
+        <!-- ══ TOP CONFIGURATION BAR (horizontal) ══ -->
+        <div class="config-bar glass-card">
+            <div class="cfg-group">
+                <label class="inp-label" for="nInput">Board Size (N)</label>
+                <div class="inp-row">
+                    <button class="inp-btn" id="nDec">−</button>
+                    <input type="number" id="nInput" class="inp-field" value="4" min="4" max="10">
+                    <button class="inp-btn" id="nInc">+</button>
+                </div>
+            </div>
+
+            <div class="cfg-group cfg-speed">
+                <label class="inp-label" for="speedInput">Speed</label>
+                <input type="range" id="speedInput" class="speed-slider" min="1" max="10" value="5">
+                <div class="speed-labels"><span>Slow</span><span>Fast</span></div>
+            </div>
+
+            <div class="cfg-group cfg-algo">
+                <label class="inp-label">Algorithm</label>
+                <div class="algo-toggle">
+                    <button class="algo-opt active" id="algoBacktrack" data-algo="backtrack">Backtracking</button>
+                    <button class="algo-opt" id="algoBrute" data-algo="brute">Brute Force</button>
+                </div>
+            </div>
+
+            <div class="cfg-group cfg-btns">
+                <button class="btn btn-primary" id="startBtn">
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                    Start
+                </button>
+                <button class="btn btn-outline" id="stepBtn" disabled>Step</button>
+                <button class="btn btn-outline" id="autoBtn" disabled>Auto</button>
+                <button class="btn btn-ghost" id="resetBtn">Reset</button>
+            </div>
+
+            <div class="cfg-group cfg-stats">
+                <div class="stat-pill green">
+                    <span class="stat-num" id="statSolutions">0</span>
+                    <span class="stat-lbl">Solutions</span>
+                </div>
+                <div class="stat-pill amber">
+                    <span class="stat-num" id="statBacktracks">0</span>
+                    <span class="stat-lbl">Backtracks</span>
+                </div>
+                <div class="stat-pill indigo">
+                    <span class="stat-num" id="statNodes">0</span>
+                    <span class="stat-lbl">Nodes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 2-COLUMN LAYOUT:  Board | Tree ══ -->
+        <div class="viz-layout">
+
+            <!-- ── LEFT: Chessboard ── -->
+            <div class="panel-board glass-card">
+                <div class="panel-header">
+                    <h3 class="panel-title" id="boardTitle">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/></svg>
+                        Chessboard — 4 × 4
+                    </h3>
+                    <span class="status-badge" id="statusBadge">Ready</span>
+                </div>
+
+                <!-- Step Info -->
+                <div class="step-info" id="stepInfo">
+                    <span class="step-counter" id="stepCount">0 / 0</span>
+                    <span class="step-text" id="stepText">Click <strong>Start</strong> to begin.</span>
+                </div>
+
+                <!-- Board area -->
+                <div class="board-area" id="boardArea">
+                    <div class="board-col-labels" id="colLabels"></div>
+                    <div class="board-body">
+                        <div class="board-row-labels" id="rowLabels"></div>
+                        <div class="chess-grid" id="chessGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Step Log -->
+                <div class="step-log-wrap" id="stepLogWrap" style="display:none">
+                    <div class="step-log-title">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+                        Step Log
+                    </div>
+                    <div class="step-log" id="stepLog"></div>
+                </div>
+
+                <!-- Legend -->
+                <div class="board-legend">
+                    <div class="legend-row"><span class="swatch" style="background:#6366f1"></span>Placed</div>
+                    <div class="legend-row"><span class="swatch" style="background:#ef4444"></span>Conflict</div>
+                    <div class="legend-row"><span class="swatch" style="background:#10b981"></span>Solution</div>
+                    <div class="legend-row"><span class="swatch" style="background:rgba(245,158,11,0.5);border:1px solid #f59e0b"></span>Active Row</div>
+                </div>
+            </div>
+
+            <!-- ── RIGHT: Tree (gets more space) ── -->
+            <div class="panel-tree glass-card">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 110-2h4a1 1 0 011 1v4a1 1 0 11-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 112 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 110 2H4a1 1 0 01-1-1v-4z"/></svg>
+                        Backtracking Tree
+                    </h3>
+                    <div class="tree-legend">
+                        <span class="tleg-dot" style="background:#6366f1"></span>Active
+                        <span class="tleg-dot" style="background:#ef4444;margin-left:8px"></span>Pruned
+                        <span class="tleg-dot" style="background:#10b981;margin-left:8px"></span>Solution
+                    </div>
+                </div>
+                <div class="tree-hint" id="treeHint">Tree appears after clicking Start. Shows complete backtracking structure.</div>
+                <div class="tree-container" id="treeContainer">
+                    <svg id="treeSvg"></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solutions Output Box -->
+        <div class="solutions-output glass-card" id="solutionsOutput" style="display:none">
+            <div class="sol-out-header">
+                <h3 class="panel-title">
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
+                    Solutions Found — <span id="solOutCount">0</span> of <span id="solOutTotal">?</span>
+                </h3>
+                <span class="sol-out-badge">Each board shows a valid placement of all queens</span>
+            </div>
+            <div class="sol-boards-grid" id="solBoardsGrid"></div>
+        </div>
+
+        <!-- Complexity Summary -->
+                <div class="sol-count-row">
+                    <strong>Known Solutions:</strong>
+                    N=4: <b>2</b> &nbsp;|&nbsp; N=5: <b>10</b> &nbsp;|&nbsp; N=6: <b>4</b> &nbsp;|&nbsp;
+                    N=7: <b>40</b> &nbsp;|&nbsp; N=8: <b>92</b> &nbsp;|&nbsp; N=9: <b>352</b> &nbsp;|&nbsp; N=10: <b>724</b>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
